@@ -1,0 +1,41 @@
+name: OCI Auto-Sniper 24/7
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  snipe:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: oci-sniper
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Auto-Sniper
+        env:
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
+          OCI_KEY_CONTENT: ${{ secrets.OCI_KEY_CONTENT }}
+          OCI_REGION: ${{ secrets.OCI_REGION || 'us-ashburn-1' }}
+          OCI_AD: ${{ secrets.OCI_AD || 'RbsL:US-ASHBURN-AD-1' }}
+          BOOT_VOLUME_OCID: ${{ secrets.BOOT_VOLUME_OCID || 'ocid1.bootvolume.oc1.iad.abuwcljrgirwkpyaptzw35i3qmnq5jlei76qgktdnk6be6zgds6ln7m5f4bq' }}
+          SUBNET_OCID: ${{ secrets.SUBNET_OCID || 'ocid1.subnet.oc1.iad.aaaaaaaacykkjtru6urue2upaxvt3pifv63zvp5fitfg2ui4lluayjjsufza' }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
