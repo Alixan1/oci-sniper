@@ -14,6 +14,22 @@ def send_telegram(msg):
         except Exception as e:
             print(f"Telegram notification error: {e}", flush=True)
 
+def trigger_next_run():
+    gh_token = os.getenv("GH_PAT")
+    repo_full = os.getenv("GITHUB_REPOSITORY", "Alixan1/oci-sniper")
+    if gh_token:
+        try:
+            print(f"Chaining next workflow run for {repo_full}...", flush=True)
+            res = requests.post(
+                f"https://api.github.com/repos/{repo_full}/actions/workflows/sniper.yml/dispatches",
+                headers={"Authorization": f"Bearer {gh_token}", "Accept": "application/vnd.github+json"},
+                json={"ref": "main"},
+                timeout=15
+            )
+            print(f"Next workflow dispatched: {res.status_code}", flush=True)
+        except Exception as e:
+            print(f"Error triggering next run: {e}", flush=True)
+
 def main():
     user = os.getenv("OCI_USER_OCID")
     tenancy = os.getenv("OCI_TENANCY_OCID")
@@ -78,11 +94,11 @@ def main():
     )
 
     start_time = time.time()
-    # Run for up to 5 minutes per action run
-    max_duration = 300 
+    # Run continuous loop for 3 hours (10,800 seconds) per workflow run
+    max_duration = 10800 
     attempt = 1
 
-    print(f"Starting OCI Auto-Sniper for AD: {ad}...", flush=True)
+    print(f"Starting OCI Auto-Sniper (3-Hour Continuous Loop) for AD: {ad}...", flush=True)
 
     while time.time() - start_time < max_duration:
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Attempt #{attempt}: Launching instance...", flush=True)
@@ -126,7 +142,8 @@ def main():
         attempt += 1
         time.sleep(30)
 
-    print("Workflow interval elapsed. Next scheduled run will continue automatically.", flush=True)
+    print("3-Hour loop completed. Automatically dispatching next cycle...", flush=True)
+    trigger_next_run()
 
 if __name__ == "__main__":
     main()
