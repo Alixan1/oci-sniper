@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: oci-sniper
-      cancel-in-progress: false
+      cancel-in-progress: true
 
     steps:
       - name: Checkout code
@@ -32,8 +32,7 @@ jobs:
           OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
           OCI_KEY_CONTENT: ${{ secrets.OCI_KEY_CONTENT }}
           OCI_REGION: ${{ secrets.OCI_REGION || 'us-ashburn-1' }}
-          OCI_AD: ${{ secrets.OCI_AD || 'RbsL:US-ASHBURN-AD-1' }}
-          BOOT_VOLUME_OCID: ${{ secrets.BOOT_VOLUME_OCID || 'ocid1.bootvolume.oc1.iad.abuwcljrgirwkpyaptzw35i3qmnq5jlei76qgktdnk6be6zgds6ln7m5f4bq' }}
+          IMAGE_OCID: 'ocid1.image.oc1.iad.aaaaaaaabcwypxed4llxx3bkwdfsbmqhbmpxxa4jsiyanobo55rjbkftcr4a'
           SUBNET_OCID: ${{ secrets.SUBNET_OCID || 'ocid1.subnet.oc1.iad.aaaaaaaacykkjtru6urue2upaxvt3pifv63zvp5fitfg2ui4lluayjjsufza' }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
           GH_PAT: ${{ secrets.GH_PAT }}
