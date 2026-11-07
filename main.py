@@ -108,7 +108,7 @@ def main():
     max_duration = 10800 # 3-hour continuous loop
     attempt = 1
 
-    print(f"Starting OCI Accelerated Sniper (8s cycle, AD-1/AD-2/AD-3)...", flush=True)
+    print(f"Starting OCI Ultra-Aggressive Sniper (2s cycle, AD-1/AD-2/AD-3)...", flush=True)
 
     while time.time() - start_time < max_duration:
         ts = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -175,7 +175,7 @@ def main():
             sys.exit(0)
 
         attempt += 1
-        time.sleep(8) # Fast 8-second interval
+        time.sleep(2) # Ultra-aggressive 2-second interval
 
     print("3-Hour loop completed. Automatically dispatching next cycle...", flush=True)
     trigger_next_run()
