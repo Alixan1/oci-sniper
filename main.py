@@ -35,6 +35,9 @@ def try_launch(compute, launch_details, spec_label, ad_name):
         res = compute.launch_instance(launch_details).data
         return True, res.id, ""
     except oci.exceptions.ServiceError as e:
+        if e.status == 429:
+            time.sleep(15)
+            return False, None, "Rate limited (429) - backed off 15s"
         if "Out of host capacity" in str(e.message):
             return False, None, "Out of host capacity"
         return False, None, f"OCI Error ({e.status}) {e.code} - {e.message}"
@@ -76,10 +79,10 @@ def main():
         "region": region
     }
 
-    compute = oci.core.ComputeClient(config, timeout=(15.0, 60.0))
-    vn_client = oci.core.VirtualNetworkClient(config, timeout=(15.0, 60.0))
+    compute = oci.core.ComputeClient(config, timeout=(10.0, 30.0))
+    vn_client = oci.core.VirtualNetworkClient(config, timeout=(10.0, 30.0))
 
-    # 150 GB boot volume keeps total tenancy storage under 200 GB (50 GB existing AMD + 150 GB ARM = 200 GB)
+    # 150 GB boot volume keeps total tenancy storage under 200 GB
     source_details = oci.core.models.InstanceSourceViaImageDetails(
         source_type="image",
         image_id=arm_img_id,
@@ -105,7 +108,7 @@ def main():
     max_duration = 10800 # 3-hour continuous loop
     attempt = 1
 
-    print(f"Starting OCI Multi-AD Sniper (AD-1, AD-2, AD-3) for ARM A1...", flush=True)
+    print(f"Starting OCI Accelerated Sniper (8s cycle, AD-1/AD-2/AD-3)...", flush=True)
 
     while time.time() - start_time < max_duration:
         ts = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -172,7 +175,7 @@ def main():
             sys.exit(0)
 
         attempt += 1
-        time.sleep(30)
+        time.sleep(8) # Fast 8-second interval
 
     print("3-Hour loop completed. Automatically dispatching next cycle...", flush=True)
     trigger_next_run()
