@@ -86,7 +86,7 @@ def main():
     source_details = oci.core.models.InstanceSourceViaImageDetails(
         source_type="image",
         image_id=arm_img_id,
-        boot_volume_size_in_gbs=150
+        boot_volume_size_in_gbs=50
     )
 
     create_vnic_details = oci.core.models.CreateVnicDetails(
@@ -175,7 +175,7 @@ def main():
             sys.exit(0)
 
         attempt += 1
-        time.sleep(2) # Ultra-aggressive 2-second interval
+        time.sleep(3) # Safe 3-second interval to prevent 429
 
     print("3-Hour loop completed. Automatically dispatching next cycle...", flush=True)
     trigger_next_run()
